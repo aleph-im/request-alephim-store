@@ -2,4 +2,4 @@
 Contributors
 ============
 
-* Jonathan Schemoul <jonathan.schemoul@gmail.com>
+* Moshe Malawach <moshe@aleph.im>
