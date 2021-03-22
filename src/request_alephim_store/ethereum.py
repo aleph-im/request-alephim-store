@@ -62,7 +62,7 @@ def get_account():
         return None
 
 
-def get_logs_query(web3, contract, start_height, end_height, topics):
+async def get_logs_query(web3, contract, start_height, end_height, topics):
     logs = web3.eth.getLogs({'address': contract.address,
                              'fromBlock': start_height,
                              'toBlock': end_height,
@@ -71,12 +71,12 @@ def get_logs_query(web3, contract, start_height, end_height, topics):
         yield log
         
 
-def get_logs(web3, contract, start_height, topics=None):
+async def get_logs(web3, contract, start_height, topics=None):
     print(start_height)
     try:
         logs = get_logs_query(web3, contract,
                               start_height+1, 'latest', topics=topics)
-        for log in logs:
+        async for log in logs:
             yield log
     except ValueError as e:
         # we got an error, let's try the pagination aware version.
@@ -93,7 +93,7 @@ def get_logs(web3, contract, start_height, topics=None):
             try:
                 logs = get_logs_query(web3, contract,
                                       start_height, end_height, topics=topics)
-                for log in logs:
+                async for log in logs:
                     yield log
 
                 start_height = end_height + 1
@@ -105,11 +105,12 @@ def get_logs(web3, contract, start_height, topics=None):
 
             except ValueError as e:
                 if e.args[0]['code'] == -32005:
-                    end_height = start_height + 100
+                    end_height = start_height + 1000
                 else:
                     raise
+            
 
-def process_storage_history(start_height=0):
+async def process_storage_history(start_height=0):
     web3 = get_web3()
     contract = get_storage_contract(web3)
     abi = contract.events.NewHash._get_event_abi()
@@ -120,11 +121,17 @@ def process_storage_history(start_height=0):
     end_height = web3.eth.blockNumber
     count = 0
 
-    for i in get_logs(web3, contract, start, topics=topic):
+    async for i in get_logs(web3, contract, start, topics=topic):
         count += 1
         evt_data = get_event_data(web3.codec, abi, i)
         args = evt_data['args']
         height = evt_data['blockNumber']
         LOGGER.debug(f"{height}: {evt_data}")
+        context = {"source_chain": 'ETH',
+                   "source_contract": settings.ethereum_event_contract,
+                   "tx_hash": evt_data.transactionHash.hex(),
+                   "height": evt_data.blockNumber,
+                   "submitter": args['hashSubmitter']}
+        yield (context, args["hash"])
         
     LOGGER.info(f"Scanned {count} events")

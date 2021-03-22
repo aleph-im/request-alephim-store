@@ -18,7 +18,8 @@ Note: This skeleton file can be safely removed if not needed!
 import argparse
 import sys
 import logging
-from .ethereum import process_storage_history
+import asyncio
+from .request import process_history
 
 from request_alephim_store import __version__
 
@@ -80,7 +81,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    process_storage_history()
+    asyncio.run(process_history())
     
 
 
