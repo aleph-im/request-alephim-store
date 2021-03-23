@@ -29,16 +29,17 @@ async def handle_cid(session, context, cid):
     if previous is None:
         cid_content = await get_cid_content(session, cid)
         if cid_content is not None:
-            print(context["height"], len(cid_content))
+            LOGGER.debug("{}:{}/{} bytes".format(context["height"],
+                                                 cid, len(cid_content)))
         else:
-            print(context["height"], "Error")
+            LOGGER.warning("{}:{} ERROR".format(context["height"], cid))
             return
         # await ipfs_push_file(io.StringIO(cid_content),
         #                      api_server=settings.aleph_api_server)
         await create_storage(session, cid, cid_content, context)
     else:
         ALREADY_HANDLED.add(cid)
-        print(context["height"], "Already handled")
+        LOGGER.debug("{} Already handled".format(context["height"]))
 
 
 async def process_history(start_height=0):
