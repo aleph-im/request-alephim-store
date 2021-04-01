@@ -15,7 +15,6 @@ from eth_keys import keys
 from hexbytes import HexBytes
 from async_lru import alru_cache
 from functools import lru_cache
-from aiocache import cached
 from .settings import settings
 
 import logging
