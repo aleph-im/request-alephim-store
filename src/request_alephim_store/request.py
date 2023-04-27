@@ -36,7 +36,7 @@ async def handle_cid(session, context, cid):
             return
         # await ipfs_push_file(io.StringIO(cid_content),
         #                      api_server=settings.aleph_api_server)
-        await create_storage(session, cid, cid_content, context)
+        await create_storage(content=cid_content, context=context, ref=f"request-{cid}")
     else:
         ALREADY_HANDLED.add(cid)
         LOGGER.debug("{} Already handled".format(context["height"]))
