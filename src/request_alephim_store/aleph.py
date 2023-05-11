@@ -1,4 +1,5 @@
-    
+from typing import Any, Dict, Optional
+
 from aleph_client.asynchronous import create_store
 from aleph_client.chains.ethereum import ETHAccount
 from functools import lru_cache
@@ -23,7 +24,7 @@ async def get_previous_stored(session, cid):
         settings.aleph_api_server
     ), params={
         "msgType": "STORE",
-        "refs": cid, 
+        "refs": f"request-{cid}",
         "address": get_aleph_address(),
         "channels": settings.aleph_channel
     }) as resp:
@@ -34,7 +35,7 @@ async def get_previous_stored(session, cid):
             return None
 
 
-async def create_storage(session, ref, content, context):
+async def create_storage(content: str, context: Dict[str, Any], ref: Optional[str] = None):
     LOGGER.debug(f"Preparing STORE item for {ref} on height {context['height']}")
     store = await create_store(
         get_aleph_account(),
