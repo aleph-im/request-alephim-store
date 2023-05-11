@@ -48,5 +48,5 @@ async def create_storage(content: str, context: Dict[str, Any], ref: Optional[st
             **context
         })
     print(store["content"]["item_hash"], ref)
-    assert store["content"]["item_hash"] == ref
+    assert f"request-{store['content']['item_hash']}" == ref
     return store
